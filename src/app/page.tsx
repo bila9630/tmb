@@ -17,6 +17,7 @@ import { WelcomeScreen } from '@/components/WelcomeScreen';
 import { useAtomValue } from 'jotai';
 import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { FinishScreen } from '@/components/FinishScreen';
+import { LeaderboardScreen } from '@/components/LeaderboardScreen';
 
 const store = getDefaultStore();
 
@@ -171,12 +172,24 @@ export default function Home() {
   const [started, setStarted] = useState(false);
   const [onboarded, setOnboarded] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const session = useRef<RealtimeSession<any> | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [events, setEvents] = useState<TransportEvent[]>([]);
   const [history, setHistory] = useState<RealtimeItem[]>([]);
+
+  const resetGame = () => {
+    setStarted(false);
+    setOnboarded(false);
+    setFinished(false);
+    setShowLeaderboard(false);
+    // Reset any other game state if needed
+    store.set(pointsAtom, 0);
+    store.set(accomplishedTasksAtom, new Set());
+    store.set(accomplishedAchievementsAtom, new Set());
+  };
 
   useEffect(() => {
     session.current = new RealtimeSession(agent);
@@ -236,8 +249,12 @@ export default function Home() {
     return <OnboardingScreen onDone={() => setOnboarded(true)} />;
   }
 
+  if (showLeaderboard) {
+    return <LeaderboardScreen onRetry={resetGame} />;
+  }
+
   if (finished) {
-    return <FinishScreen />;
+    return <FinishScreen onContinue={() => setShowLeaderboard(true)} />;
   }
 
   return (

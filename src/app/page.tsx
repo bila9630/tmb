@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { getToken } from './server/token';
 import { App } from '@/components/App';
 import { getDefaultStore } from 'jotai';
-import { pointsAtom, accomplishedTasksAtom } from '@/store/points';
+import { pointsAtom, accomplishedTasksAtom, accomplishedAchievementsAtom } from '@/store/points';
 
 const store = getDefaultStore();
 
@@ -29,13 +29,42 @@ const weatherTool = tool({
 
 const achievementTool = tool({
   name: 'unlock_achievement',
-  description: 'Unlock achievement for user',
+  description: 'Unlock achievement and award points',
   parameters: z.object({
-    achievement: z.string().describe("Either achievement 1, 2 or 3"),
+    achievement: z.number().describe("Either 1, 2 or 3"),
   }),
   execute: ({ achievement }) => {
-    // TODO: Implement unlock achievement here
-    return `The user unlocked the ${achievement}`;
+    // Get current accomplished achievements
+    const accomplishedAchievements = store.get(accomplishedAchievementsAtom);
+
+    // If achievement is already accomplished, return early
+    if (accomplishedAchievements.has(achievement)) {
+      return `Achievement ${achievement} was already unlocked`;
+    }
+
+    // Award points based on achievement
+    let points = 0;
+    switch (achievement) {
+      case 1: // Sing happy birthday
+        points = 100;
+        break;
+      case 2: // Compliment looks
+        points = 75;
+        break;
+      case 3: // Yell in frustration
+        points = 80;
+        break;
+    }
+
+    // Update both atoms
+    store.set(pointsAtom, prev => prev + points);
+    store.set(accomplishedAchievementsAtom, prev => {
+      const newSet = new Set(prev);
+      newSet.add(achievement);
+      return newSet;
+    });
+
+    return `Achievement ${achievement} unlocked`;
   },
 });
 
@@ -121,10 +150,15 @@ const agent = new RealtimeAgent({
     - Task 2: Check if Mr. Bauer took his medicines (example: Did you take your medicine, etc.)
     - Task 3: Check if Mr. Bauer hygiene (example: Did you brush your teeth, comb your hair, etc.)
 
+    There are hidden achievements user can achieve and you can call achievementTool 
+    once the user fulfills the condition:
+    - Achievement 1: Its accomplished when the user sing happy birthday
+    - Achievement 2: Compliment the patients looks
+    - Achievement 3: Yell in frustration
+
     Dont mention anything regarding points. It should happen behind the scene.
     `,
-  // tools: [weatherTool, achievementTool, addPointTool, accomplishTaskTool],
-  tools: [weatherTool, addPointTool, accomplishTaskTool],
+  tools: [weatherTool, addPointTool, accomplishTaskTool, achievementTool],
 });
 
 

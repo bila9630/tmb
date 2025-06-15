@@ -151,13 +151,13 @@ const agent = new RealtimeAgent({
 
     There are tasks that the user should accomplish and you can call accomplishTaskTool
     once the user fulfills the condition:
-    - Task 1: Check comfort (example: Are you comfortable, need anything, etc.)
+    - Task 1: Its accomplished when the user sings happy birthday (example: happy birthday to you, etc.)
     - Task 2: Check if Mr. Bauer took his medicines (example: Did you take your medicine, etc.)
     - Task 3: Check if Mr. Bauer hygiene (example: Did you brush your teeth, comb your hair, etc.)
 
     There are hidden achievements user can achieve and you can call achievementTool 
     once the user fulfills the condition:
-    - Achievement 1: Its accomplished when the user sing happy birthday
+    - Achievement 1: Ask him about his most memorable birthday
     - Achievement 2: Compliment the patients looks
     - Achievement 3: Yell in frustration
 

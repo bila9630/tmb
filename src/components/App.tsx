@@ -5,8 +5,10 @@ import {
 import { History } from '@/components/History';
 import { Button } from '@/components/ui/Button';
 import { LogsSheet } from "@/components/LogsSheet";
+import { TasksDisplay } from "@/components/TasksDisplay";
 import { useAtom } from 'jotai';
 import { pointsAtom } from '@/store/points';
+import { accomplishedTasksAtom } from '@/store/points';
 
 // Points display component
 function PointsDisplay() {
@@ -49,6 +51,9 @@ export function App({
         <div className="bg-white rounded-lg shadow p-4 h-[200px] flex items-center justify-center border border-gray-200">
           <img src="/person/happy.png" alt="Person" className="w-full h-full object-contain" />
         </div>
+
+        {/* Tasks Section */}
+        <TasksDisplay />
 
         {/* Chat Window Section */}
         <div className="bg-white rounded-lg shadow p-4 h-[400px] overflow-y-auto border border-gray-200">

@@ -19,6 +19,7 @@ import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { FinishScreen } from '@/components/FinishScreen';
 import { LeaderboardScreen } from '@/components/LeaderboardScreen';
 import { PointPopUp } from '@/components/PointPopUp';
+import { Toaster, toast } from "sonner";
 
 const store = getDefaultStore();
 
@@ -51,7 +52,7 @@ const achievementTool = tool({
     // Award points based on achievement
     let points = 0;
     switch (achievement) {
-      case 1: // Sing happy birthday
+      case 1: // most memorable birthday
         points = 100;
         break;
       case 2: // Compliment looks
@@ -69,6 +70,27 @@ const achievementTool = tool({
       newSet.add(achievement);
       return newSet;
     });
+
+    if (achievement === 2) {
+      toast.success("Achievement Dr. McDreamy!", {
+        description: `Flirt mode unlocked, + ${points}`,
+        duration: 5000,
+      });
+    } else if (achievement === 1) {
+      toast.success("Achievement Nostalgia Navigator!", {
+        description: `Unveiling memories, + ${points} points`,
+        duration: 5000,
+      });
+    } else if (achievement === 3) {
+      toast.success("Achievement Gordon Ramsey!", {
+        description: `Emotional release, + ${points} points`,
+        duration: 5000,
+      });
+    } else {
+      toast.success(`Achievement ${achievement} unlocked! You gained ${points} points.`, {
+        duration: 5000,
+      });
+    }
 
     return `Achievement ${achievement} unlocked`;
   },
@@ -271,6 +293,7 @@ export default function Home() {
         onFinish={() => setFinished(true)}
       />
       <PointPopUp />
+      <Toaster position="top-center" />
     </>
   );
 }

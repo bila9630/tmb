@@ -1,7 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import { useAtomValue } from 'jotai';
-import { pointsAtom } from '@/store/points'; // Assuming pointsAtom is exported here
+import { pointsAtom, userNameAtom } from '@/store/points';
+import { supabase } from '@/lib/supabaseClient';
 
 interface FinishScreenProps {
     onContinue: () => void;
@@ -9,10 +10,29 @@ interface FinishScreenProps {
 
 export function FinishScreen({ onContinue }: FinishScreenProps) {
     const finalPoints = useAtomValue(pointsAtom);
+    const userName = useAtomValue(userNameAtom);
     const [email, setEmail] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmitEmail = () => {
-        // Always continue to leaderboard
+    const handleSubmitEmail = async () => {
+        setIsSubmitting(true);
+        // Only insert email if it's provided
+        const emailToInsert = email || null; // Use null if email is empty
+
+        const { data, error } = await supabase
+            .from('gamescore')
+            .insert([
+                { name: userName || 'Anonymous', score: finalPoints, email: emailToInsert },
+            ]);
+
+        if (error) {
+            console.error('Error inserting score:', error);
+            alert('Failed to save score. Please try again.');
+        } else {
+            console.log('Score saved:', data);
+        }
+
+        setIsSubmitting(false);
         onContinue();
     };
 
@@ -45,8 +65,9 @@ export function FinishScreen({ onContinue }: FinishScreenProps) {
                     <button
                         onClick={handleSubmitEmail}
                         className="bg-blue-600 text-white px-8 py-3 rounded font-semibold text-lg shadow hover:bg-blue-700 transition"
+                        disabled={isSubmitting}
                     >
-                        View Leaderboard
+                        {isSubmitting ? 'Saving...' : 'View Leaderboard'}
                     </button>
                 </div>
             </div>

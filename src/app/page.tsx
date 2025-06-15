@@ -8,26 +8,12 @@ import {
   RealtimeOutputGuardrail,
   OutputGuardrailTripwireTriggered,
   RealtimeItem,
-  RealtimeContextData,
 } from '@openai/agents/realtime';
 import { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
-import { handleRefundRequest } from './server/backendAgent';
 import { getToken } from './server/token';
 import { App } from '@/components/App';
 
-const params = z.object({
-  request: z.string(),
-});
-const refundBackchannel = tool<typeof params, RealtimeContextData>({
-  name: 'Refund Expert',
-  description: 'Evaluate a refund',
-  parameters: params,
-  execute: async ({ request }, details) => {
-    const history: RealtimeItem[] = details?.context?.history ?? [];
-    return handleRefundRequest(request, history);
-  },
-});
 
 const weatherTool = tool({
   name: 'weather',
@@ -40,53 +26,14 @@ const weatherTool = tool({
   },
 });
 
-// To invoke this tool, you can ask a question like "What is the special number?"
-const secretTool = tool({
-  name: 'secret',
-  description: 'A secret tool to tell the special number',
-  parameters: z.object({
-    question: z
-      .string()
-      .describe(
-        'The question to ask the secret tool; mainly about the special number.',
-      ),
-  }),
-  execute: async ({ question }) => {
-    return `The answer to ${question} is 42.`;
-  },
-  // RealtimeAgent handles this approval process within tool_approval_requested events
-  needsApproval: true,
-});
-
-const weatherExpert = new RealtimeAgent({
-  name: 'Weather Expert',
-  instructions:
-    'You are a weather expert. You are able to answer questions about the weather.',
-  tools: [weatherTool],
-});
 
 const agent = new RealtimeAgent({
   name: 'Greeter',
   instructions:
-    'You are a greeter. Always greet the user with a "top of the morning" at the start of the conversation. When you use a tool always first say what you are about to do.',
-  tools: [refundBackchannel, secretTool],
-  handoffs: [weatherExpert],
+    'You are an elderly person. You are a bit forgetful and you need to use the weather tool to remember what the weather is like.  When you use a tool always first say what you are about to do.',
+  tools: [weatherTool],
 });
 
-const guardrails: RealtimeOutputGuardrail[] = [
-  {
-    name: 'No mention of Dom',
-    execute: async ({ agentOutput }) => {
-      const domInOutput = agentOutput.includes('Dom');
-      return {
-        tripwireTriggered: domInOutput,
-        outputInfo: {
-          domInOutput,
-        },
-      };
-    },
-  },
-];
 
 export default function Home() {
   const session = useRef<RealtimeSession<any> | null>(null);
@@ -99,21 +46,10 @@ export default function Home() {
   const [history, setHistory] = useState<RealtimeItem[]>([]);
 
   useEffect(() => {
-    session.current = new RealtimeSession(agent, {
-      outputGuardrails: guardrails,
-      outputGuardrailSettings: {
-        debounceTextLength: 200,
-      },
-    });
+    session.current = new RealtimeSession(agent);
     session.current.on('transport_event', (event) => {
       setEvents((events) => [...events, event]);
     });
-    session.current.on(
-      'guardrail_tripped',
-      (_context, _agent, guardrailError) => {
-        setOutputGuardrailResult(guardrailError);
-      },
-    );
     session.current.on('history_updated', (history) => {
       setHistory(history);
     });

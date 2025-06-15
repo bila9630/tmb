@@ -18,7 +18,7 @@ export type AppProps = {
 };
 
 export function App({
-  title = 'Realtime Agent Demo',
+  title = 'Healthcare Challenge',
   isConnected,
   isMuted,
   toggleMute,

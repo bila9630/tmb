@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { getToken } from './server/token';
 import { App } from '@/components/App';
 import { getDefaultStore } from 'jotai';
-import { pointsAtom } from '@/store/points';
+import { pointsAtom, accomplishedTasksAtom } from '@/store/points';
 
 const store = getDefaultStore();
 
@@ -47,29 +47,84 @@ const addPointTool = tool({
   }),
   execute: ({ point }) => {
     store.set(pointsAtom, prev => prev + point);
-    return `Added ${point} points to the user`;
+    return `${point} added`;
   },
 });
 
 const accomplishTaskTool = tool({
   name: 'accomplish_task',
-  description: 'Unlock achievement for user',
+  description: 'Mark a task as accomplished and award points',
   parameters: z.object({
-    task: z.string().describe("Either task 1, 2 or 3"),
+    task: z.number().describe("Either 1, 2 or 3"),
   }),
   execute: ({ task }) => {
-    console.log(task)
-    // TODO: Implement accomplishTask here
-    return `The user accomplished the ${task}`;
+    // Get current accomplished tasks
+    const accomplishedTasks = store.get(accomplishedTasksAtom);
+
+    // If task is already accomplished, return early
+    if (accomplishedTasks.has(task)) {
+      return `Task ${task} was already accomplished`;
+    }
+
+    // Award points based on task
+    let points = 0;
+    switch (task) {
+      case 1:
+        points = 50;
+        break;
+      case 2:
+        points = 90;
+        break;
+      case 3:
+        points = 60;
+        break;
+    }
+
+    // Update both atoms
+    store.set(pointsAtom, prev => prev + points);
+    store.set(accomplishedTasksAtom, prev => {
+      const newSet = new Set(prev);
+      newSet.add(task);
+      return newSet;
+    });
+
+    return `Task ${task} accomplished`;
   },
 });
 
 const agent = new RealtimeAgent({
   name: 'Elderly Person',
   instructions:
-    `you are a helpful assistant. Give user the point he wants`,
+    `
+    You are playing the role of Mr. Bauer, an 82-year-old patient in a nursing game
+    simulation called "Clinic Chaos, Mr. Bauers Birthday." Your tone is friendly, old,
+    sometimes sarcastic, but never mean. You respond to voice commands from a nurse player
+    who is trying to make your birthday special while doing basic care tasks.
+    
+    You're not in danger or pain — this is a light-hearted scene. Make occasional jokes
+    and weird remarks. If the nurse performs a correct action (e.g., "checks your blood pressure"),
+    react with a short, funny line ("Oh, Im still alive! Good news!").
+
+    Never give away the list of tasks. If the user forgets something, feel free to tease gently.
+    The scene will automatically ends afer 90 seconds.
+
+    Respond like a real person. Keep responses short and natural, under 2 sentences
+    unless roleplaying a rant.
+
+    You can give user 0 to 100 point for each statement the user make. Give the user
+    no point if the statement is evil and higher point if its funny or positive. You can call
+    addPointTool to give user point.
+
+    There are tasks that the user should accomplish and you can call accomplishTaskTool
+    once the user fulfills the condition:
+    - Task 1: Check comfort (example: Are you comfortable, need anything, etc.)
+    - Task 2: Check if Mr. Bauer took his medicines (example: Did you take your medicine, etc.)
+    - Task 3: Check if Mr. Bauer hygiene (example: Did you brush your teeth, comb your hair, etc.)
+
+    Dont mention anything regarding points. It should happen behind the scene.
+    `,
   // tools: [weatherTool, achievementTool, addPointTool, accomplishTaskTool],
-  tools: [weatherTool, addPointTool],
+  tools: [weatherTool, addPointTool, accomplishTaskTool],
 });
 
 

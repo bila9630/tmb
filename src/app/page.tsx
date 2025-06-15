@@ -197,6 +197,7 @@ export default function Home() {
   const [onboarded, setOnboarded] = useState(false);
   const [finished, setFinished] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60); // 1 minute countdown
 
   const session = useRef<RealtimeSession<any> | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -209,6 +210,7 @@ export default function Home() {
     setOnboarded(false);
     setFinished(false);
     setShowLeaderboard(false);
+    setTimeLeft(60); // Reset timer as well
     // Reset any other game state if needed
     store.set(pointsAtom, 0);
     store.set(accomplishedTasksAtom, new Set());
@@ -238,10 +240,31 @@ export default function Home() {
     );
   }, []);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+    if (isConnected && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && isConnected) {
+      // Time's up, disconnect and go to finish screen
+      session.current?.close();
+      setIsConnected(false);
+      setFinished(true);
+    }
+
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [isConnected, timeLeft, setFinished]);
+
   async function connect() {
     if (isConnected) {
       await session.current?.close();
       setIsConnected(false);
+      setTimeLeft(60); // Reset timer on disconnect
     } else {
       const token = await getToken();
       try {
@@ -249,6 +272,7 @@ export default function Home() {
           apiKey: token,
         });
         setIsConnected(true);
+        setTimeLeft(60); // Start timer on connect
       } catch (error) {
         console.error('Error connecting to session', error);
       }
@@ -291,6 +315,7 @@ export default function Home() {
         history={history}
         events={events}
         onFinish={() => setFinished(true)}
+        timeLeft={timeLeft}
       />
       <PointPopUp />
       <Toaster position="top-center" />

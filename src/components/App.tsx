@@ -28,6 +28,7 @@ export type AppProps = {
   history?: RealtimeItem[];
   events: TransportEvent[];
   onFinish: () => void;
+  timeLeft: number;
 };
 
 export function App({
@@ -38,12 +39,19 @@ export function App({
   history,
   events,
   onFinish,
+  timeLeft,
 }: AppProps) {
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+
   return (
     <div className="flex flex-col h-screen p-4 items-center">
       <div className="w-full max-w-xl flex justify-between items-center mb-4">
         <PointsDisplay />
-        <div className="font-semibold text-lg">0:56</div> {/* Timer Placeholder */}
+        <div className="font-semibold text-lg">{formatTime(timeLeft)}</div>
       </div>
 
       <div className="flex flex-col flex-grow w-full max-w-xl gap-4">

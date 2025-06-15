@@ -46,8 +46,8 @@ export function App({
 
       <div className="flex flex-col flex-grow w-full max-w-xl gap-4">
         {/* Image of Person Section */}
-        <div className="bg-white rounded-lg shadow p-4 flex-1 flex items-center justify-center border border-gray-200">
-          <span className="text-gray-400 text-xl">Image of person</span>
+        <div className="bg-white rounded-lg shadow p-4 h-[200px] flex items-center justify-center border border-gray-200">
+          <img src="/person/happy.png" alt="Person" className="w-full h-full object-contain" />
         </div>
 
         {/* Chat Window Section */}

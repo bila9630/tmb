@@ -5,8 +5,6 @@ import {
   RealtimeSession,
   tool,
   TransportEvent,
-  RealtimeOutputGuardrail,
-  OutputGuardrailTripwireTriggered,
   RealtimeItem,
 } from '@openai/agents/realtime';
 import { useEffect, useRef, useState } from 'react';
@@ -39,8 +37,6 @@ export default function Home() {
   const session = useRef<RealtimeSession<any> | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [outputGuardrailResult, setOutputGuardrailResult] =
-    useState<OutputGuardrailTripwireTriggered<any> | null>(null);
 
   const [events, setEvents] = useState<TransportEvent[]>([]);
   const [history, setHistory] = useState<RealtimeItem[]>([]);
@@ -103,7 +99,6 @@ export default function Home() {
       toggleMute={toggleMute}
       connect={connect}
       history={history}
-      outputGuardrailResult={outputGuardrailResult}
       events={events}
     />
   );

@@ -1,10 +1,10 @@
 import {
   RealtimeItem,
-  OutputGuardrailTripwireTriggered,
   TransportEvent,
 } from '@openai/agents/realtime';
 import { History } from '@/components/History';
 import { Button } from '@/components/ui/Button';
+import { LogsSheet } from "@/components/LogsSheet";
 
 export type AppProps = {
   title?: string;
@@ -13,7 +13,6 @@ export type AppProps = {
   toggleMute: () => void;
   connect: () => void;
   history?: RealtimeItem[];
-  outputGuardrailResult?: OutputGuardrailTripwireTriggered<any> | null;
   events: TransportEvent[];
 };
 
@@ -24,7 +23,6 @@ export function App({
   toggleMute,
   connect,
   history,
-  outputGuardrailResult,
   events,
 }: AppProps) {
   return (
@@ -32,7 +30,8 @@ export function App({
       <div className="p-4 md:max-h-screen overflow-hidden h-screen flex flex-col max-w-6xl w-full">
         <header className="flex-none flex justify-between items-center pb-4 w-full max-w-6xl">
           <h1 className="text-2xl font-bold">{title}</h1>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <LogsSheet events={events} />
             {isConnected && (
               <Button
                 onClick={toggleMute}
@@ -58,26 +57,6 @@ export function App({
                 No history available
               </div>
             )}
-          </div>
-          <div className="flex-1/3 flex flex-col flex-grow gap-4">
-            {outputGuardrailResult && (
-              <div className="flex-0 w-full p-2 border border-blue-300 rounded-md bg-blue-50 text-blue-900 text-xs self-end shadow-sm">
-                <span className="font-semibold">Guardrail:</span>{' '}
-                {outputGuardrailResult?.message ||
-                  JSON.stringify(outputGuardrailResult)}
-              </div>
-            )}
-            <div
-              className="overflow-scroll w-96 max-h-64 md:h-full md:max-h-none flex-1 p-4 border border-gray-300 rounded-lg [&_pre]:bg-gray-100 [&_pre]:p-4 [&_summary]:mb-2 [&>details]:border-b [&>details]:border-gray-200 [&>details]:py-2 text-xs"
-              id="eventLog"
-            >
-              {events.map((event, index) => (
-                <details key={index}>
-                  <summary>{event.type}</summary>
-                  <pre>{JSON.stringify(event, null, 2)}</pre>
-                </details>
-              ))}
-            </div>
           </div>
         </div>
       </div>

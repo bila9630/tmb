@@ -9,4 +9,7 @@ export const accomplishedTasksAtom = atom<Set<number>>(new Set<number>());
 export const accomplishedAchievementsAtom = atom<Set<number>>(new Set<number>());
 
 // Atom to store the user's name
-export const userNameAtom = atom<string>(''); 
+export const userNameAtom = atom<string>('');
+
+// Atom for point pop-up animation
+export const pointPopUpAtom = atom<{ value: number; id: number } | null>(null); 

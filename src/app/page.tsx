@@ -12,12 +12,13 @@ import { z } from 'zod';
 import { getToken } from './server/token';
 import { App } from '@/components/App';
 import { getDefaultStore } from 'jotai';
-import { pointsAtom, accomplishedTasksAtom, accomplishedAchievementsAtom, userNameAtom } from '@/store/points';
+import { pointsAtom, accomplishedTasksAtom, accomplishedAchievementsAtom, userNameAtom, pointPopUpAtom } from '@/store/points';
 import { WelcomeScreen } from '@/components/WelcomeScreen';
 import { useAtomValue } from 'jotai';
 import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { FinishScreen } from '@/components/FinishScreen';
 import { LeaderboardScreen } from '@/components/LeaderboardScreen';
+import { PointPopUp } from '@/components/PointPopUp';
 
 const store = getDefaultStore();
 
@@ -121,6 +122,7 @@ const accomplishTaskTool = tool({
       newSet.add(task);
       return newSet;
     });
+    store.set(pointPopUpAtom, { value: points, id: Date.now() });
 
     return `Task ${task} accomplished`;
   },
@@ -258,14 +260,17 @@ export default function Home() {
   }
 
   return (
-    <App
-      isConnected={isConnected}
-      isMuted={isMuted}
-      toggleMute={toggleMute}
-      connect={connect}
-      history={history}
-      events={events}
-      onFinish={() => setFinished(true)}
-    />
+    <>
+      <App
+        isConnected={isConnected}
+        isMuted={isMuted}
+        toggleMute={toggleMute}
+        connect={connect}
+        history={history}
+        events={events}
+        onFinish={() => setFinished(true)}
+      />
+      <PointPopUp />
+    </>
   );
 }

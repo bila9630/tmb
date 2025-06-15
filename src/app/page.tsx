@@ -12,7 +12,11 @@ import { z } from 'zod';
 import { getToken } from './server/token';
 import { App } from '@/components/App';
 import { getDefaultStore } from 'jotai';
-import { pointsAtom, accomplishedTasksAtom, accomplishedAchievementsAtom } from '@/store/points';
+import { pointsAtom, accomplishedTasksAtom, accomplishedAchievementsAtom, userNameAtom } from '@/store/points';
+import { WelcomeScreen } from '@/components/WelcomeScreen';
+import { useAtomValue } from 'jotai';
+import { OnboardingScreen } from '@/components/OnboardingScreen';
+import { FinishScreen } from '@/components/FinishScreen';
 
 const store = getDefaultStore();
 
@@ -157,16 +161,20 @@ const agent = new RealtimeAgent({
     - Achievement 3: Yell in frustration
 
     Dont mention anything regarding points. It should happen behind the scene.
+    It's really important that you give the users points 
     `,
   tools: [weatherTool, addPointTool, accomplishTaskTool, achievementTool],
 });
 
-
 export default function Home() {
+  const userName = useAtomValue(userNameAtom);
+  const [started, setStarted] = useState(false);
+  const [onboarded, setOnboarded] = useState(false);
+  const [finished, setFinished] = useState(false);
+
   const session = useRef<RealtimeSession<any> | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-
   const [events, setEvents] = useState<TransportEvent[]>([]);
   const [history, setHistory] = useState<RealtimeItem[]>([]);
 
@@ -181,7 +189,6 @@ export default function Home() {
     session.current.on(
       'tool_approval_requested',
       (_context, _agent, approvalRequest) => {
-        // You'll be prompted when making the tool call that requires approval in web browser.
         const approved = confirm(
           `Approve tool call to ${approvalRequest.tool.name} with parameters:\n ${JSON.stringify(approvalRequest.tool.parameters, null, 2)}?`,
         );
@@ -221,6 +228,18 @@ export default function Home() {
     }
   }
 
+  if (!userName || !started) {
+    return <WelcomeScreen onStart={() => setStarted(true)} />;
+  }
+
+  if (!onboarded) {
+    return <OnboardingScreen onDone={() => setOnboarded(true)} />;
+  }
+
+  if (finished) {
+    return <FinishScreen />;
+  }
+
   return (
     <App
       isConnected={isConnected}
@@ -229,6 +248,7 @@ export default function Home() {
       connect={connect}
       history={history}
       events={events}
+      onFinish={() => setFinished(true)}
     />
   );
 }

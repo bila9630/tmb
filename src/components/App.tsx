@@ -28,6 +28,7 @@ export type AppProps = {
   connect: () => void;
   history?: RealtimeItem[];
   events: TransportEvent[];
+  onFinish: () => void;
 };
 
 export function App({
@@ -38,6 +39,7 @@ export function App({
   connect,
   history,
   events,
+  onFinish,
 }: AppProps) {
   return (
     <div className="flex justify-center">
@@ -60,6 +62,12 @@ export function App({
                 variant={isConnected ? 'stop' : 'primary'}
               >
                 {isConnected ? 'Disconnect' : 'Connect'}
+              </Button>
+              <Button
+                onClick={onFinish}
+                variant="outline"
+              >
+                Finish
               </Button>
             </div>
           </div>

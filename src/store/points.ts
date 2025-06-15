@@ -6,4 +6,7 @@ export const pointsAtom = atom(0);
 export const accomplishedTasksAtom = atom<Set<number>>(new Set<number>());
 
 // Using Set to store unique achievement numbers that have been accomplished
-export const accomplishedAchievementsAtom = atom<Set<number>>(new Set<number>()); 
+export const accomplishedAchievementsAtom = atom<Set<number>>(new Set<number>());
+
+// Atom to store the user's name
+export const userNameAtom = atom<string>(''); 

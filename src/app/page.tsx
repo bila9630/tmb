@@ -11,7 +11,10 @@ import { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 import { getToken } from './server/token';
 import { App } from '@/components/App';
+import { getDefaultStore } from 'jotai';
+import { pointsAtom } from '@/store/points';
 
+const store = getDefaultStore();
 
 const weatherTool = tool({
   name: 'weather',
@@ -24,12 +27,49 @@ const weatherTool = tool({
   },
 });
 
+const achievementTool = tool({
+  name: 'unlock_achievement',
+  description: 'Unlock achievement for user',
+  parameters: z.object({
+    achievement: z.string().describe("Either achievement 1, 2 or 3"),
+  }),
+  execute: ({ achievement }) => {
+    // TODO: Implement unlock achievement here
+    return `The user unlocked the ${achievement}`;
+  },
+});
+
+const addPointTool = tool({
+  name: 'add_point',
+  description: 'Give point to user',
+  parameters: z.object({
+    point: z.number().describe("Point to give to user"),
+  }),
+  execute: ({ point }) => {
+    store.set(pointsAtom, prev => prev + point);
+    return `Added ${point} points to the user`;
+  },
+});
+
+const accomplishTaskTool = tool({
+  name: 'accomplish_task',
+  description: 'Unlock achievement for user',
+  parameters: z.object({
+    task: z.string().describe("Either task 1, 2 or 3"),
+  }),
+  execute: ({ task }) => {
+    console.log(task)
+    // TODO: Implement accomplishTask here
+    return `The user accomplished the ${task}`;
+  },
+});
 
 const agent = new RealtimeAgent({
-  name: 'Greeter',
+  name: 'Elderly Person',
   instructions:
-    'You are an elderly person. You are a bit forgetful and you need to use the weather tool to remember what the weather is like.  When you use a tool always first say what you are about to do.',
-  tools: [weatherTool],
+    `you are a helpful assistant. Give user the point he wants`,
+  // tools: [weatherTool, achievementTool, addPointTool, accomplishTaskTool],
+  tools: [weatherTool, addPointTool],
 });
 
 

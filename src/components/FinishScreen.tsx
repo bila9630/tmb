@@ -4,6 +4,7 @@ import { useAtomValue } from 'jotai';
 import { pointsAtom, userNameAtom } from '@/store/points';
 import { supabase } from '@/lib/supabaseClient';
 import { TasksDisplay } from '@/components/TasksDisplay';
+import { AchievementsDisplay } from '@/components/AchievementsDisplay';
 
 interface FinishScreenProps {
     onContinue: () => void;
@@ -52,6 +53,8 @@ export function FinishScreen({ onContinue }: FinishScreenProps) {
                 </div>
 
                 <TasksDisplay />
+
+                <AchievementsDisplay />
 
                 <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
                     <div className="font-semibold text-lg mb-2">Want to be notified if you win?</div>
